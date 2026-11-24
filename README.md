@@ -1,5 +1,7 @@
 # SpiderJsReverseSkill
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 Agent skills for Web/JS reverse workflows (Cursor / Codex / compatible hosts). Pick skills per task; do not require disabling others.
 
 Maintainer: [John zxy](https://github.com/zxyanqing)
