@@ -1,0 +1,97 @@
+#!/usr/bin/env node
+/**
+ * Narrow runner (scheme B) — sample-scoped
+ * sample_id: __SAMPLE_ID__
+ * morphology_id: __MORPHOLOGY_ID__
+ *
+ * Fill guards using evidence from morphology.json / notes.md.
+ * Reuse child-process eval; never eval the whole sample in-process.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import parser from '@babel/parser';
+import traverseMod from '@babel/traverse';
+import generateMod from '@babel/generator';
+
+const traverse = traverseMod.default ?? traverseMod;
+const generate = generateMod.default ?? generateMod;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Resolve bundled deobfuscator helpers (evaluate-in-child).
+const deobRoot = path.resolve(__dirname, '../../tools/deobfuscator');
+
+function parseArgs(argv) {
+  const out = { input: null, output: null, report: null };
+  const rest = argv.slice(2);
+  for (let i = 0; i < rest.length; i += 1) {
+    const a = rest[i];
+    if (a === '--in') out.input = rest[++i];
+    else if (a === '--out') out.output = rest[++i];
+    else if (a === '--report') out.report = rest[++i];
+  }
+  return out;
+}
+
+async function loadEvaluateInChild() {
+  const url = pathToFileURL(path.join(deobRoot, 'src/lib/evaluate-in-child.js')).href;
+  return import(url);
+}
+
+async function main() {
+  const args = parseArgs(process.argv);
+  if (!args.input || !args.output) {
+    console.error('Usage: node runner.mjs --in in.js --out out.js [--report report.json]');
+    process.exit(1);
+  }
+
+  const source = fs.readFileSync(path.resolve(args.input), 'utf8');
+  const ast = parser.parse(source, { sourceType: 'script', errorRecovery: true });
+
+  // TODO(__MORPHOLOGY_ID__): implement sample-specific transforms with fail-closed guards.
+  // Example pattern:
+  // 1) Prove bootstrap / decoder bindings
+  // 2) Build minimal closure source
+  // 3) const { evaluateInChildSync } = await loadEvaluateInChild();
+  // 4) Replace proven call sites with literals
+  // 5) Optional: linear state flatten only after labels are literals
+
+  let changed = 0;
+  const skips = [];
+
+  // Placeholder traverse — replace with real guards.
+  traverse(ast, {
+    Program(p) {
+      if (!p.node.body?.length) skips.push('empty-program');
+    },
+  });
+
+  // Keep loadEvaluateInChild referenced so scaffold stays ready to wire.
+  void loadEvaluateInChild;
+
+  const { code } = generate(ast, { compact: false, comments: true }, source);
+  const outPath = path.resolve(args.output);
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, code.endsWith('\n') ? code : `${code}\n`, 'utf8');
+
+  const report = {
+    sample_id: '__SAMPLE_ID__',
+    morphology_id: '__MORPHOLOGY_ID__',
+    changed,
+    skips,
+    note: 'scaffold only — implement guards before trusting output',
+  };
+  if (args.report) {
+    fs.writeFileSync(path.resolve(args.report), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  }
+  console.error(JSON.stringify(report));
+  if (report.note.includes('scaffold only')) {
+    console.error('Narrow runner is still a scaffold; fill implementation before production use.');
+    process.exitCode = 2;
+  }
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

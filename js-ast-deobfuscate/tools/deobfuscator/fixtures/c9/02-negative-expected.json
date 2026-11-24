@@ -1,0 +1,12 @@
+{
+  "ignoredPaths": [
+    "navigator.userAgent"
+  ],
+  "requiredReasons": [
+    "direct-eval",
+    "with-scope",
+    "dynamic-property"
+  ],
+  "status": "analyzed-with-stops"
+}
+

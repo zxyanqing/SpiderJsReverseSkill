@@ -1,0 +1,20 @@
+{
+  "requiredPaths": [
+    "Date.now",
+    "Math.random",
+    "TextEncoder",
+    "fetch",
+    "globalThis.crypto.subtle.digest",
+    "navigator.userAgent",
+    "window.location.href"
+  ],
+  "requiredPurposes": {
+    "Date.now": "nondeterministic",
+    "Math.random": "nondeterministic",
+    "fetch": "network-boundary",
+    "globalThis.crypto.subtle.digest": "algorithm",
+    "navigator.userAgent": "detection",
+    "window.location.href": "browser-api"
+  }
+}
+

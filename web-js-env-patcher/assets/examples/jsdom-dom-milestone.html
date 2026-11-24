@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>dom-milestone</title>
+  <base href="https://milestone.test/app/">
+</head>
+<body>
+  <div id="probe">ok</div>
+  <script id="s1">
+    window.__milestone = window.__milestone || {};
+    window.__milestone.s1Current = document.currentScript && document.currentScript.id;
+    window.__milestone.shared = 'from-s1';
+    window.__milestone.node = document.querySelector('#probe');
+    window.__milestone.rel = new URL('asset.js', document.baseURI).href;
+  </script>
+  <script id="s2">
+    window.__milestone = window.__milestone || {};
+    window.__milestone.s2Current = document.currentScript && document.currentScript.id;
+    window.__milestone.fromFirst = window.__milestone.shared;
+    window.__milestone.sameWindow = window.__milestone.node && window.__milestone.node.ownerDocument === document;
+  </script>
+</body>
+</html>

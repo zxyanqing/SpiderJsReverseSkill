@@ -1,0 +1,8 @@
+.DS_Store
+*.log
+node_modules/
+tools/deobfuscator/node_modules/
+tools/deobfuscator/tmp/
+*.report.json
+best.js
+pipeline.round*.json

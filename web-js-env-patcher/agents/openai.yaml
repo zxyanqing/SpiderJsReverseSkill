@@ -1,0 +1,4 @@
+interface:
+  display_name: "网页 JS 补环境"
+  short_description: "围绕本地产物被接受，自主补环境、纠错、选择测试并复核方向"
+  default_prompt: "使用 $web-js-env-patcher。仓库不含 node_modules：涉及 DOM/jsdom 示例或 npm test 时先在本 skill 根目录 npm ci --ignore-scripts。围绕本地产物被目标消费方接受自主补环境、排错和验证；自行选择本地或在线测试，复核核心假设与组合行为，局部任务完成后继续推进总体目标。"
