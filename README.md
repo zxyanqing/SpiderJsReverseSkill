@@ -22,32 +22,24 @@ Babel AST deobfuscation (scheme A REGISTRY + optional sample-scoped scheme B).
 - Entry: `js-ast-deobfuscate/SKILL.md` (agents: read **Agent install / first-use gate** first)
 - Runtime: `js-ast-deobfuscate/tools/deobfuscator`
 
-## Agent: install skill + deps (do this yourselves)
+## Agent: runtime deps (do this yourselves)
 
-`node_modules` is **not** in git. Symlink/copy is only discovery; run package installs when the skill requires them.
+`node_modules` is **not** in git. After this repo is available to the agent host, install packages when the skill requires them.
 
 ```bash
 REPO="<path-to-this-repo>"
 
-# 1) Discoverable install (host skills dir)
-ln -sfn "$REPO/web-js-env-patcher" "$HOME/.cursor/skills/web-js-env-patcher"
-ln -sfn "$REPO/js-ast-deobfuscate" "$HOME/.cursor/skills/js-ast-deobfuscate"
-# Codex example:
-# ln -sfn "$REPO/web-js-env-patcher" "$HOME/.codex/skills/web-js-env-patcher"
-# ln -sfn "$REPO/js-ast-deobfuscate" "$HOME/.codex/skills/js-ast-deobfuscate"
-
-# 2) js-ast-deobfuscate — REQUIRED before any pipeline
+# 1) js-ast-deobfuscate — REQUIRED before any pipeline
 cd "$REPO/js-ast-deobfuscate/tools/deobfuscator" && npm install
 
-# 3) web-js-env-patcher — when DOM/jsdom examples or npm test are needed
+# 2) web-js-env-patcher — when DOM/jsdom examples or npm test are needed
 cd "$REPO/web-js-env-patcher" && npm ci --ignore-scripts
 ```
 
 Rules for agents:
 
-- Softlink alone ≠ runtime ready.
 - Missing `node_modules` / `Cannot find module 'jsdom'` / Babel resolve errors → install as above; do not treat as target-site failures.
-- `web-js-env-patcher` without DOM may skip step 3; any jsdom example, milestone, or `npm test` must do step 3 first.
+- `web-js-env-patcher` without DOM may skip step 2; any jsdom example, milestone, or `npm test` must do step 2 first.
 - Native addon / xbs binaries under `web-js-env-patcher/assets/` are optional per task/platform.
 
 ## Notes

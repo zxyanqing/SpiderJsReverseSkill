@@ -26,7 +26,7 @@ Authorize/self-built samples only.
 
 ## Agent install / first-use gate
 
-Repo does **not** ship `node_modules`. Symlinking this skill folder is enough for discovery. Before **any** scheme A/B run, detect, or fixture pipeline:
+Repo does **not** ship `node_modules`. Once this skill is available to the agent, before **any** scheme A/B run, detect, or fixture pipeline:
 
 1. `cd` to this skill’s `tools/deobfuscator`.
 2. If `node_modules` is missing, run `npm install` (agent does this; do not ask the user to do it first).

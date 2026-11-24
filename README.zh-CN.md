@@ -22,32 +22,24 @@
 - 入口：`js-ast-deobfuscate/SKILL.md`（agent 请先读 **Agent install / first-use gate**）
 - 运行时：`js-ast-deobfuscate/tools/deobfuscator`
 
-## Agent：安装 skill 与依赖（请自行执行）
+## Agent：运行依赖（请自行执行）
 
-仓库**不**包含 `node_modules`。软链/拷贝只解决「被客户端发现」；需要运行时再自行安装依赖。
+仓库**不**包含 `node_modules`。本仓库对 agent 可用后，按 skill 需要自行安装依赖。
 
 ```bash
 REPO="<本仓库路径>"
 
-# 1) 安装为可发现的 skill（软链）
-ln -sfn "$REPO/web-js-env-patcher" "$HOME/.cursor/skills/web-js-env-patcher"
-ln -sfn "$REPO/js-ast-deobfuscate" "$HOME/.cursor/skills/js-ast-deobfuscate"
-# Codex 示例：
-# ln -sfn "$REPO/web-js-env-patcher" "$HOME/.codex/skills/web-js-env-patcher"
-# ln -sfn "$REPO/js-ast-deobfuscate" "$HOME/.codex/skills/js-ast-deobfuscate"
-
-# 2) js-ast-deobfuscate — 跑任何流水线前必须执行
+# 1) js-ast-deobfuscate — 跑任何流水线前必须执行
 cd "$REPO/js-ast-deobfuscate/tools/deobfuscator" && npm install
 
-# 3) web-js-env-patcher — 需要 DOM/jsdom 示例或 npm test 时执行
+# 2) web-js-env-patcher — 需要 DOM/jsdom 示例或 npm test 时执行
 cd "$REPO/web-js-env-patcher" && npm ci --ignore-scripts
 ```
 
 给 agent 的规则：
 
-- 仅软链 ≠ 运行就绪。
 - 出现缺少 `node_modules` / `Cannot find module 'jsdom'` / Babel 解析失败 → 按上面安装；不要当成目标站环境缺陷。
-- `web-js-env-patcher` 无 DOM 时可跳过步骤 3；一旦跑 jsdom 示例、里程碑或 `npm test`，必须先做步骤 3。
+- `web-js-env-patcher` 无 DOM 时可跳过步骤 2；一旦跑 jsdom 示例、里程碑或 `npm test`，必须先做步骤 2。
 - `web-js-env-patcher/assets/` 下的 native addon / xbs 按平台与任务选用，非每个任务前置。
 
 ## 说明

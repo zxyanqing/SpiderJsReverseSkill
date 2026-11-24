@@ -7,7 +7,7 @@ description: Run original website JavaScript locally, diagnose browser-environme
 
 ## Agent 安装 / 首次使用前置
 
-仓库**不**包含 `node_modules`。软链或拷贝本 skill 目录即完成「安装识别」；下列依赖按需由 agent **自行安装**，不要等用户提醒。
+仓库**不**包含 `node_modules`。本 skill 对 agent 可用后，下列依赖按需由 agent **自行安装**，不要等用户提醒。
 
 1. **DOM / jsdom 路径、跑 `assets/examples/` 下 jsdom 示例、或 `npm test`：** 在本 skill 根目录执行 `npm ci --ignore-scripts`（或 `npm install`）。缺 jsdom 包时先装再跑，禁止把 `Cannot find module 'jsdom'` 当作环境缺陷去补。
 2. **无 DOM、只用 vm/脚本诊断：** 可不装 jsdom。
