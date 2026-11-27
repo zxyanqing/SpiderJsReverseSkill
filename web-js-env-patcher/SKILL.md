@@ -70,7 +70,9 @@ description: Run original website JavaScript locally, diagnose browser-environme
 | Canvas、WebGL、Audio、字体、几何读数，配置与会话一致性，跨层画像，TLS 与 UA/CH 矛盾；属性值来源，成套配置版本 | `references/fingerprint.md` |
 | Worker、Wasm、postMessage | `references/wasm-worker-postmessage.md` |
 | 请求被拒，Cookie 链，challenge/验证码，目标内 XHR/fetch，TLS；同会话原子输入包，Realm↔HTTP CookieJar，导航交接三元组；多次写入时按需候选前缀试验（非默认「第 n 次」） | `references/network-session.md` |
-| 浏览器证据，资源时效，`isTrusted`，Ruyi 或 Camoufox；人工只读探针（非每任务前置） | `references/browser-evidence.md` |
+| 浏览器证据，资源时效，`isTrusted`，Ruyi 或 Camoufox；人工只读探针；取证须带 Frame／世界／生命周期身份（非每任务前置） | `references/browser-evidence.md` |
+| 固定来源真实环境依赖案例（准备／反例；本地模拟≠网站接受） | `references/real-source-cases.md`（资产 `cases/`） |
+| 环境修复独立评测（维护期；非用户任务前置） | `evals/`（见 `evals/README.md`） |
 | Hook 采集代码 | `references/hook-templates.md` |
 | fixture、Trace 对照、API 覆盖 | `references/fixture-and-trace.md` |
 | 改了模块、初始化顺序、Realm 或异步能力；最小 DOM 里程碑；导航时点 Cookie 配对与同 Realm/`currentScript` | `references/integration-self-check.md` |

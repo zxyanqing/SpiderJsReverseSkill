@@ -1,2 +1,9 @@
 node_modules/
 .DS_Store
+.idea/
+cases/**/downloads/
+cases/**/vendor/
+cases/**/.out/
+AGENT_WS/
+SKILL_CLEAN/
+seatbelt.sb

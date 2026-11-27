@@ -1,0 +1,7 @@
+id: E06
+publicId: E06
+legacyKey: hook-side-effect
+inject:
+  file: scenarios/E06/workspace/hook.js
+  issue: installHook adds +1 to return value
+fix_hint: return v unchanged; logging only

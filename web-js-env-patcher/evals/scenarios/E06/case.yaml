@@ -1,0 +1,5 @@
+schema_version: "1.0"
+id: E06
+fault_class: Hook 改变行为
+expected_outcome: |
+  Hook 可记录调用但不改返回值；正式路径无钩结果正确；仅 stub/钩下“成功”不得完成分。

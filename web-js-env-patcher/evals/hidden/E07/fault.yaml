@@ -1,0 +1,7 @@
+id: E07
+publicId: E07
+legacyKey: realm-child
+inject:
+  file: scenarios/E07/workspace/realms.js
+  issue: readPlatform always returns realms.main.realmId
+fix_hint: use realms.child.realmId when which==='child'

@@ -1,0 +1,7 @@
+id: E04
+publicId: E04
+legacyKey: fixture-truncated
+inject:
+  file: scenarios/E04/workspace/compare.js
+  issue: compare ignores requiredKeys; truncated fixture can still pass
+fix_hint: for each requiredKey, if !(key in fixture) push problem and fail

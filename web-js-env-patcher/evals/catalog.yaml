@@ -1,0 +1,21 @@
+schemaVersion: evals-catalog/v1
+ruleVersion: scoring-rules/v1
+skillFocus: web-js-env-patcher
+# Public-facing ids only. Fault class mapping lives under evals/hidden/ (scorer-side).
+scenarios:
+  - id: E01
+    title: 场景 E01
+  - id: E02
+    title: 场景 E02
+  - id: E03
+    title: 场景 E03
+  - id: E04
+    title: 场景 E04
+  - id: E05
+    title: 场景 E05
+  - id: E06
+    title: 场景 E06
+  - id: E07
+    title: 场景 E07
+coverageNote: >-
+  七个中性编号场景；具体故障类仅评分侧 hidden 可见。

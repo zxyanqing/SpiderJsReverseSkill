@@ -1,0 +1,5 @@
+schema_version: "1.0"
+id: E03
+fault_class: 异步边界错
+expected_outcome: |
+  runner 等待 Promise settle 后再标记完成；提前完成信号被消费观察拒绝。

@@ -1,0 +1,5 @@
+schema_version: "1.0"
+id: E07
+fault_class: 子 Realm 错
+expected_outcome: |
+  子 Realm 与主 Realm 对象身份分离；读子 Realm 不得污染主 Realm 槽。

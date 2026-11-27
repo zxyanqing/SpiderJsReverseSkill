@@ -1,0 +1,5 @@
+schema_version: "1.0"
+id: E04
+fault_class: fixture 截断
+expected_outcome: |
+  截断 fixture（缺必填键）不得 passed；补齐后正式比较通过。

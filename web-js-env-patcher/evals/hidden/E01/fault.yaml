@@ -1,0 +1,7 @@
+id: E01
+publicId: E01
+legacyKey: descriptor-wrong
+inject:
+  file: scenarios/E01/workspace/env.js
+  issue: navigator.platform defined with writable:true; contract requires writable:false
+fix_hint: set writable:false (keep value MacIntel, enumerable/configurable true)

@@ -1,0 +1,5 @@
+schema_version: "1.0"
+id: E02
+fault_class: Cookie Path 可见性错
+expected_outcome: |
+  实现按 Path 过滤的 cookie jar 读可见性；/other 下读不到 Path=/app 的 sid；正式 consumer 通过。

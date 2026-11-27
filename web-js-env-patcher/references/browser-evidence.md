@@ -32,6 +32,32 @@
 
 Trace、Hook、HAR、截图和控制台日志各有覆盖范围。记录原始证据与采集变换；不因工具名称自动认定样本更真实。动态资源见下文「动态资源有效期」；专项 ruyiPage / Camoufox 命令见下文「ruyiPage 与 RuyiTrace 工具」「Camoufox 采集」。
 
+## 取证上下文与生命周期身份
+
+关键浏览器证据须带齐**可限定结论的上下文**；缺项则结论只能降级为线索，不得自动升格为「本次正式路径证据」。Frame／世界／生命周期身份须**双方均有非空有效值且一致**才可正式合并或肯定同生命周期；**任一方缺失／`null`／双方都缺**一律视为未知（降级线索／拒绝默认复用），不得把「双方都未知」当成「相同」。借鉴多世界／Frame／跨导航边界的记录方法，落入本 Skill 语义；**不**新建全工具首检平台。
+
+| 维度 | 记录什么 | 常见误用 |
+| --- | --- | --- |
+| 页面／导航身份 | URL、导航／刷新世代、文档加载世代或等价 session／navigation id | 同 URL 旧生命周期调用当成当前证据 |
+| Frame | 主 Frame vs 子 Frame（URL／name／稳定选择子）；跨 Frame 须显式标注 | 子 Frame 与主 Frame 同名 API 证据无标注混用 |
+| 执行世界 | 主世界（page／main）vs 隔离世界（isolated／content-script 等） | 隔离世界读数冒充页面自有全局 |
+| 采集窗口 | 起止时间、是否可能截断（log cap／buffer 满） | 「未观察到调用」不区分：截断 vs 未执行 vs 错上下文 |
+| Hook／Trace 状态 | 是否已 install、是否已 uninstall／正式去钩、采集时是否仍挂着诊断钩 | 带钩样本当未插桩基线；清理后仍当本轮证据 |
+| 取值时点 | **事件发生时**的值 ≠ 追踪结束后的安全快照 | 把结束后快照写成事件瞬时值 |
+
+限定规则：
+
+1. **子 Frame**：与主 Frame 的同名 API／存储／Cookie 观察必须分条记录；合并结论须说明为何可比。
+2. **同 URL 刷新／再导航**：新生命周期开始后，旧样本默认失效；默认「同生命周期」须 URL／导航世代／**Frame／世界**均有效且一致（双缺≠相同）。跨 Frame／跨世界不得静默复用；仅当结构化字段 `attested===true` 且 `allowCrossContext===true` 时才可有条件复用；`conditions` 文本仅作说明，**不授予、不否决**许可。
+3. **日志 cap／采集窗口／上下文／命中计数**：空结果或「未见调用」须标注 `possibly_capped`／截断未知；**仅当** `hits` 为已知有限数字且 `=== 0`，且**采集窗口**已知有效并覆盖目标执行阶段、Frame／世界与期望均**有效且一致**（双缺≠相同），才能主张「未执行」；`hits` 缺失／非有限／非零未知不得 `proveAbsence`，上下文／窗口／cap／观察器不能补足计数；不能单凭空日志或缺项上下文证明目标未访问环境。
+4. **主／隔离世界**：读页面自有全局或包装页面函数时用主世界；默认隔离世界的结果不得直接当作页面契约。
+5. **清理边界**：`uninstall`／去钩／清 buffer **只**影响本次干预与诊断数据；不得假定已恢复其他 Realm 或外部 Context。正式路径就绪须能证明控制句柄完整（含可核查的 `patches` 数组状态）；仅有 `uninstall`、无完整补丁状态不得冒充已卸载。正式验收关闭 Hook 见 `references/hook-templates.md`。
+6. **无浏览器**：本节不阻塞本地 jsdom／Node 路径；缺浏览器证据时标未知并继续不依赖它的工作（见 `references/workflow.md`「无浏览器／本地启动」）。
+
+人工探针若在真实页面执行，回传 JSON 时应附带页面 URL、是否 iframe、执行世界（若可知）与采集时间，以便按上表限定。
+
+可编程辅助（与上表同口径，供标注／合并／清理边界判断；**不是**浏览器本体）：`scripts/evidence_lifecycle.js`（`mergeSameApiEvidence`／`canReuseAfterRefresh`／`interpretNoObservation`／`afterCleanup`／`realmStateFromHookControl`／`annotateEvidenceSample`）。Hook 路径清理见 `references/hook-templates.md`。
+
 ### 工具能力与检测
 
 ruyiPage 通过 Firefox WebDriver BiDi 提供网络、Cookie、Storage 和交互观察；RuyiTrace 的定制 Firefox 可输出 DOM/JS API 的 NDJSON 调用记录。Camoufox 和 CloakBrowser 提供不同的 Firefox/Chromium 采集配置。选用任何一种工具时核对 Python/Node 包、浏览器二进制、实际启动入口和版本；包可导入不等于浏览器已安装。

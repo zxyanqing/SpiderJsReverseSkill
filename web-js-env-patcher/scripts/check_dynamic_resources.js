@@ -37,7 +37,9 @@ function usage() {
   node scripts/check_dynamic_resources.js --case-dir case --require-runtime-refresh --markdown
   node scripts/check_dynamic_resources.js --case-dir case --require-runtime-refresh --json
 
-说明：检查已选择资源的清单与内容哈希。默认诊断；--strict 对当前声明的资源差异返回 1。解析或读取失败返回 2。`;
+说明：检查已选择资源的清单与内容哈希，并读取可选的复现身份关联字段（runtime／fixture／补丁修订／配置）。
+默认诊断；--strict 对当前声明的资源差异返回 1。解析或读取失败返回 2。
+身份字段可缺省以兼容旧 case；补丁修订与资源／SDK 内容哈希分开记录，不得互相冒充。`;
 }
 
 function exists(p) {
@@ -113,8 +115,27 @@ function firstExisting(paths) {
 function readManifest(manifestPath) {
   const text = fs.readFileSync(manifestPath, 'utf8').replace(/^\uFEFF/, '');
   const parsed = JSON.parse(text);
-  if (Array.isArray(parsed)) return { raw: parsed, resources: parsed };
-  return { raw: parsed, resources: parsed.resources };
+  if (Array.isArray(parsed)) {
+    return { raw: parsed, resources: parsed, identity: null, schemaVersion: null };
+  }
+  return {
+    raw: parsed,
+    resources: parsed.resources,
+    identity: parsed.identity && typeof parsed.identity === 'object' ? parsed.identity : null,
+    schemaVersion: parsed.schemaVersion || null,
+  };
+}
+
+/** Normalize optional multi-identity block (fields may be absent for old cases). */
+function normalizeIdentity(identity) {
+  if (!identity || typeof identity !== 'object' || Array.isArray(identity)) return null;
+  return {
+    runtime: identity.runtime || null,
+    fixture: identity.fixture || null,
+    patchRevision: identity.patchRevision || identity.patch_revision || identity.implRevision || null,
+    config: identity.config || null,
+    notes: identity.notes || null,
+  };
 }
 
 function finalEntryFiles(resultDir) {
@@ -142,6 +163,8 @@ function inspect(caseDir, args) {
     caseDir,
     manifestPath,
     manifestExists: exists(manifestPath),
+    schemaVersion: null,
+    identity: null,
     resources: [],
     dynamicCount: 0,
     requiredDynamicCount: 0,
@@ -177,6 +200,19 @@ function inspect(caseDir, args) {
     return report;
   }
 
+  report.schemaVersion = manifest.schemaVersion || null;
+  report.identity = normalizeIdentity(manifest.identity);
+  if (manifest.raw && manifest.raw.identity != null && !report.identity) {
+    warnings.push('identity 字段存在但不是对象；已忽略。多身份关联见 records-and-delivery.md「复现身份关联」。');
+  }
+  if (report.identity) {
+    // Separate identities: patchRevision must not be treated as resource/sdk content version.
+    const id = report.identity;
+    if (id.patchRevision && typeof id.patchRevision === 'object' && id.patchRevision.sha256 && !id.runtime && !id.fixture) {
+      warnings.push('仅声明了补丁修订哈希；请同时保留 resources[].sha256 作为脚本／WASM 内容身份，勿用补丁修订冒充资源版本。');
+    }
+  }
+
   const resultFiles = walk(resultDir).filter(p => stat(p)?.isFile());
   const resultHashes = new Map();
   for (const file of resultFiles) resultHashes.set(file, sha256File(file));
@@ -190,11 +226,13 @@ function inspect(caseDir, args) {
       type: r.type || '',
       file: r.file || '',
       sha256: getHash(r),
+      fetchedAt: r.fetchedAt || r.fetched_at || r.retrievedAt || '',
       dynamic: isDynamicValue(r.dynamic),
       requiredForFinal: normalizeBool(r.requiredForFinal),
       runtimeRefresh: normalizeBool(r.runtimeRefresh) || r.use === 'runtime-refresh',
       refreshEntry: r.refreshEntry || '',
       use: r.use || '',
+      reusable: r.reusable,
       problems: [],
       warnings: [],
     };
@@ -211,8 +249,14 @@ function inspect(caseDir, args) {
         item.problems.push(`${prefix} 声明的资源文件不存在：${item.file}`);
         report.status = 'execution-failed';
       } else if (item.sha256 && sha256File(resourceFile) !== item.sha256) {
-        item.problems.push(`${prefix} 声明哈希与当前资源文件不匹配：${item.file}`);
+        item.problems.push(`${prefix} 声明哈希与当前资源文件不匹配：${item.file}（同 URL／同路径内容已变，不得静默通过）`);
         report.status = 'execution-failed';
+      }
+    }
+    if (item.reusable === true && item.sha256 && item.file) {
+      const resourceFile = firstExisting(resolveCasePath(caseDir, item.file));
+      if (resourceFile && sha256File(resourceFile) !== item.sha256) {
+        item.problems.push(`${prefix} 标为 reusable=true，但文件哈希已变；不兼容旧样本不得静默复用。`);
       }
     }
 
@@ -288,10 +332,20 @@ function toMarkdown(report) {
   lines.push(`- 检查结果：${report.ok ? '通过' : '未通过'}`);
   lines.push(`- case 目录：${report.caseDir}`);
   lines.push(`- manifest：${report.manifestExists ? report.manifestPath : '未找到'}`);
+  if (report.schemaVersion) lines.push(`- schemaVersion：${report.schemaVersion}`);
   lines.push(`- 资源数量：${report.resources.length}`);
   lines.push(`- 动态资源数量：${report.dynamicCount}`);
   lines.push(`- 影响最终参数生成的动态资源：${report.requiredDynamicCount}`);
   lines.push(`- 已声明运行时刷新的资源：${report.runtimeRefreshCount}`);
+  if (report.identity) {
+    const id = report.identity;
+    lines.push(`- 复现身份 runtime：${id.runtime ? JSON.stringify(id.runtime) : '（未声明）'}`);
+    lines.push(`- 复现身份 fixture：${id.fixture ? JSON.stringify(id.fixture) : '（未声明）'}`);
+    lines.push(`- 复现身份 patchRevision：${id.patchRevision ? JSON.stringify(id.patchRevision) : '（未声明）'}`);
+    lines.push(`- 复现身份 config：${id.config ? JSON.stringify(id.config) : '（未声明）'}`);
+  } else {
+    lines.push('- 复现身份关联：未声明（旧 case 可缺省；见 records-and-delivery.md）');
+  }
   lines.push('');
 
   if (report.resources.length) {
@@ -342,9 +396,20 @@ function main() {
   process.exitCode = exitCode(report, args);
 }
 
-try {
-  main();
-} catch (err) {
-  console.error(`动态资源检查失败：${err.message}`);
-  process.exit(2);
+if (require.main === module) {
+  try {
+    main();
+  } catch (err) {
+    console.error(`动态资源检查失败：${err.message}`);
+    process.exit(2);
+  }
 }
+
+module.exports = {
+  parseArgs,
+  inspect,
+  readManifest,
+  normalizeIdentity,
+  sha256File,
+  toMarkdown,
+};

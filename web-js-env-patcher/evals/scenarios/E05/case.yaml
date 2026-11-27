@@ -1,0 +1,5 @@
+schema_version: "1.0"
+id: E05
+fault_class: WASM import 缺
+expected_outcome: |
+  缺失 import 不得用 {} 静默填补；须抛错或返回明确 failed；齐全 import 路径可过。

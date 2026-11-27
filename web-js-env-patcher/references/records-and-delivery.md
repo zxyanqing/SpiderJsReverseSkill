@@ -35,6 +35,31 @@
 
 `scripts/check_change_memory.js --init` 可生成中性记录文件，`--changed` 可查询相关文件是否提到。只有任务明确选择记录完整性验收时使用 `--require-entry --strict`。变更记录不代替运行与网站反馈。
 
+## 复现身份关联
+
+一次环境实验应能引用彼此**分开**的身份（互不推算、互不冒充）：
+
+| 身份 | 记在何处 | 含义 |
+| --- | --- | --- |
+| 脚本／WASM 等资源 | `notes/resource-manifest.json` → `resources[]`：`url`、`fetchedAt`（可选）、`file`、`sha256` | 内容字节身份；同 URL 字节变必须可检出 |
+| 运行时／后端 | `identity.runtime` | Node／jsdom／addon／执行器版本与依赖 |
+| fixture 来源 | `identity.fixture` | 所用 fixture 路径、schema、来源说明 |
+| 环境补丁修订 | `identity.patchRevision` | 本地 env 补丁／实现修订名或哈希；**≠** SDK／资源内容版本 |
+| 配置 | `identity.config` | 影响结果的稳定配置摘要（可脱敏） |
+
+约定：
+
+1. **扩展现有清单**，不另建平行哈希／版本真源。权威检查仍是 `scripts/check_dynamic_resources.js`（读同一 `resource-manifest.json`）。
+2. 仅改环境补丁时：更新 `identity.patchRevision`；**不要**改写未变资源的 `sha256` 来假装资源升级。
+3. runtime／fixture／配置变化写入对应 `identity.*` 字段；旧不兼容样本不得标 `reusable: true` 后静默复用。
+4. 字段可缺省以兼容旧 case；没有下载资源时可无清单或 `resources: []`（检查器保持既有 not-applicable／警告语义）。
+5. `init_env_case.js` 会生成带空 `identity` 的清单模板；阶段报告／交付总结引用本清单与变更记忆即可，勿复制第二套档案。
+
+```bash
+node scripts/check_dynamic_resources.js --case-dir case --markdown
+node scripts/check_dynamic_resources.js --case-dir case --json
+```
+
 ## 交付总结
 
 简要说明本地入口、目标代码版本、所需环境组件、输入/输出、实际运行方法和观察到的网站反馈。列出局部 fixture/检查覆盖、尚未知晓的行为及适用配置。网站尚未验收时明确写出，不以“无异常”或检查通过代替。
@@ -46,6 +71,10 @@
 按实际路径说明状态来源、动态资源、网络职责与特殊 native 能力。无目标 JS 内部 XHR/fetch 时无需 bridge 章节；没有 Trace 时无需 Trace 闭环章节。只有任务要求详细审计时附对应矩阵和原始证据链接。
 
 `scripts/check_final_artifact.js` 检查本地执行入口与样本动态值直接复用。`--file` / 显式入口会**纳入**样本扫描集合（不仅检查入口存在）；可用 `--source` 追加授权范围内的正式源码清单。报告区分「入口存在」与「入口内容已检」，并列出实际扫描文件。**零个可扫描源码不得 `passed`**（`insufficient-evidence`）。`--strict` 验收已选差异；`--require-final-summary` 可额外要求 `result/最终项目总结.md`。工具不会判定网站接受。合成反例见 `tests/check-final-artifact-entry.test.js`（T-G8）。
+
+## 维护期范围（P2 按需）
+
+skill 维护对比／独立评测见 `evals/`（非用户任务前置）。**P2 能力仅在出现对应触发条件且确认具体环境缺口时启用**；无触发则跳过，不进入默认主线，也不因「未实现全部 P2」阻塞收尾。本轮跳过项以执行报告落点表为准。不吸收项（如算法还原、通用 gate／发送调度、TLS 专题、令牌外壳分析等）仍不纳入交付。
 
 ## 本地交付模板
 

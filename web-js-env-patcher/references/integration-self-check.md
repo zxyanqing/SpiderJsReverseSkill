@@ -35,6 +35,19 @@ node --test tests/jsdom-dom-milestone.test.js
 
 回归应能检出「把导航时状态替换成最终状态」的错误。完整原子输入与 CookieJar 合并细节以 `references/network-session.md` 为准。
 
+
+## E09 子 Frame／Realm（固定来源案例回归）
+
+当目标 SDK 在页面内创建 iframe（如 `cases/fingerprintjs-local`）时，除「同 Realm」外固定核对：
+
+1. **iframe 可观察**：创建次数／节点可被记录（临时 iframe 卸载后仍保留创建计数）。
+2. **跨 Frame 归属**：子 Frame 内函数 `instanceof` 子 `Function`，且 **不是** 页面 `Function`／Node 宿主 `Function`；页面函数反之。**对象／原型**（`objectProtoDistinct`）比较的是**页面 Realm 对象 vs 子 Frame 对象**（各自 `eval('({})')`），禁止用模块宿主字面量 `{}` 冒充页面对象；须与函数 Realm **同时**进入通过条件；仅函数对、对象错须失败（反例 `e09-object-collapse`）；同原型时探针须判不区分。
+3. **清理不污染宿主**：页面路径加载不得在结束后把 jsdom `window`／`document`／`navigator` 留在（或新挂到）Node `globalThis`；`before` 无 `navigator` 而 `after` 有 → 观察失败。
+4. **失败注入**：须有反例（如 `e09-collapse`）使「子 Frame 与页面不可区分」的伪证据令观察失败，证明断言非空转。
+
+案例实现：`cases/fingerprintjs-local/lib/e09-iframe-realm.mjs`；经 `run-local.mjs`／TEST-Y06 F5 覆盖。**E11（document.all／HTMLDDA）** 无目标实依时不在本检查范围。
+
+
 ## 在真实组合后检查
 
 用正式入口完成模块安装，再获取实际返回对象；创建子上下文后重新检查原上下文。只在独立模块安装后测试，容易遗漏后续覆盖。把公开函数、实例和状态来源放在同一个运行中比较。

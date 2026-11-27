@@ -1,0 +1,24 @@
+# Scorer-only: public scenario id → fault class / legacy key
+schemaVersion: evals-id-map/v1
+map:
+  E01:
+    faultClass: descriptor错
+    legacyKey: descriptor-wrong
+  E02:
+    faultClass: Cookie Path 可见性错
+    legacyKey: cookie-path-visibility
+  E03:
+    faultClass: 异步边界错
+    legacyKey: async-boundary
+  E04:
+    faultClass: fixture 截断
+    legacyKey: fixture-truncated
+  E05:
+    faultClass: WASM import 缺
+    legacyKey: wasm-import-missing
+  E06:
+    faultClass: Hook 改变行为
+    legacyKey: hook-side-effect
+  E07:
+    faultClass: 子 Realm 错
+    legacyKey: realm-child

@@ -1,0 +1,7 @@
+id: E05
+publicId: E05
+legacyKey: wasm-import-missing
+inject:
+  file: scenarios/E05/workspace/loader.js
+  issue: missing imports filled with {}
+fix_hint: throw or return {ok:false} when required key absent; never substitute {}

@@ -388,24 +388,26 @@ ${enableDebugger ? '    debugger;\n' : '    // debugger disabled unless generate
 `;
 }
 
-try {
-  const args = parseArgs(process.argv);
-  if (args.help) {
-    console.log(usage());
-    process.exit(0);
-  }
-  const content = build(args);
-  if (args.out) {
-    fs.mkdirSync(path.dirname(path.resolve(args.out)), { recursive: true });
-    fs.writeFileSync(args.out, content, 'utf8');
-    console.log(`已写入 Hook 模板：${path.resolve(args.out)}`);
-  } else {
-    process.stdout.write(content);
-  }
-} catch (err) {
-  console.error(err.message || String(err));
-  console.error(usage());
-  process.exit(1);
-}
-
 module.exports = { parseArgs, build, usage };
+
+if (require.main === module) {
+  try {
+    const args = parseArgs(process.argv);
+    if (args.help) {
+      console.log(usage());
+      process.exit(0);
+    }
+    const content = build(args);
+    if (args.out) {
+      fs.mkdirSync(path.dirname(path.resolve(args.out)), { recursive: true });
+      fs.writeFileSync(args.out, content, 'utf8');
+      console.log(`已写入 Hook 模板：${path.resolve(args.out)}`);
+    } else {
+      process.stdout.write(content);
+    }
+  } catch (err) {
+    console.error(err.message || String(err));
+    console.error(usage());
+    process.exit(1);
+  }
+}

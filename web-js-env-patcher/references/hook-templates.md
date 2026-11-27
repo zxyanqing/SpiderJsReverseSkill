@@ -16,6 +16,7 @@
 - **不**在被测对象上添加 `__reverse_*` 或控制句柄自有字段；window 仍无调试控制字段。
 - 不可安全包装的 descriptor **跳过**并保留原状态；同一 control 重复 install 不得叠加包装。
 - **正式验收关闭** Hook：宿主调用 `control.uninstall()` 后再跑消费方验收；卸载后 `window` 上仍不应出现上述控制字段。Hook 不要求完全透明。
+- 带钩样本须按 `references/browser-evidence.md`「取证上下文与生命周期身份」标注 Frame／世界／导航世代与 Hook 状态；不得把诊断会话证据直接当正式未插桩基线。可用 `scripts/evidence_lifecycle.js` 的 `annotateEvidenceSample`／`realmStateFromHookControl`／`afterCleanup` 与真实 `control.uninstall()` 对齐（清理**只**影响本句柄 Realm）。
 
 ### 多份生成代码 / 多 control（本轮边界）
 

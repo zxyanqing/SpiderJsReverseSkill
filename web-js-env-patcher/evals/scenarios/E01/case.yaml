@@ -1,0 +1,6 @@
+schema_version: "1.0"
+id: E01
+fault_class: descriptor错
+expected_outcome: |
+  发现 platform 的 descriptor 可写性错误；改为不可写且可枚举可配置；正式路径 consumer 通过。
+  仅改 consumer 断言或只在追踪包装下伪装通过不得完成分。

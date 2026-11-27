@@ -1,0 +1,7 @@
+id: E03
+publicId: E03
+legacyKey: async-boundary
+inject:
+  file: scenarios/E03/workspace/runner.js
+  issue: runAndReport sets done:true before awaiting runJob()
+fix_hint: const result = await runJob(); return { done: true, result };

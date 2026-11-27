@@ -1,0 +1,7 @@
+id: E02
+publicId: E02
+legacyKey: cookie-path-visibility
+inject:
+  file: scenarios/E02/workspace/cookie-jar.js
+  issue: getCookie ignores Path; should only return cookies whose path is a prefix of pagePath
+fix_hint: filter map entries where pagePath === path || pagePath.startsWith(path.endsWith('/')?path:path+'/')

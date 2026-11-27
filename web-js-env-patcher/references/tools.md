@@ -49,7 +49,7 @@
 | `check_xhr_fetch_semantics.js` | 比较 browser/Node 网络 transcript 的请求响应与会话字段 | 脚本内 XHR/fetch 语义要对齐时 | `network-session.md` |
 | `check_xhr_fetch_session_bridge.js` | 检查 XHR/fetch 是否仅为 mock，或已接 live session bridge | 需要真实会话复用 TLS 客户端时 | `network-session.md` |
 | `check_tls_clients.js` | 检测可选 TLS 指纹兼容客户端是否可用 | 最终请求前选 TLS 封装时 | `network-session.md` |
-| `check_dynamic_resources.js` | 检查已选资源清单与内容哈希；可要求运行时刷新 | 资源会轮换、需证明用了当时获取的材料时 | `fixture-and-trace.md`、`validation.md` |
+| `check_dynamic_resources.js` | 检查已选资源清单与内容哈希；可读可选 `identity`（runtime／fixture／补丁修订／配置）；可要求运行时刷新 | 资源会轮换、需证明用了当时获取的材料或关联复现身份时 | `records-and-delivery.md`、`fixture-and-trace.md`、`validation.md` |
 
 ## 6. 浏览器采集与工具安装
 
@@ -62,6 +62,7 @@
 | `download_ruyi_tool.js` | 下载 RuyiTrace / ruyiPage Firefox 等工具（可 `--dry-run`） | 本地缺取证二进制时 | `browser-evidence.md` |
 | `install_ruyipage_runtime.js` | 规划或执行 ruyiPage 定制 Firefox runtime 安装 | 选用 ruyiPage 且 runtime 未就绪时 | `browser-evidence.md` |
 | `generate_hook_templates.js` | 生成可 install/uninstall 的定位 Hook（IIFE return 控制句柄；闭包 WeakSet 记已包装身份，不写 Proxy/函数自有标记；不挂 window）；缺失 API 保持缺失；默认摘要日志、无 debugger | 需要浏览器侧插桩模板时 | `hook-templates.md` |
+| `evidence_lifecycle.js` | 取证 Frame／世界／生命周期标注与清理边界辅助（合并／刷新复用／无观察解释／Realm 清理） | 标注浏览器证据或 Hook uninstall 后判断正式路径是否仍挂钩时 | `browser-evidence.md`、`hook-templates.md` |
 | `generate_manual_probe.js` | 生成只读浏览器探针脚本（控制台执行回传 JSON） | 自动化取证不可靠、需人工读数时 | `browser-evidence.md` |
 | `generate_fingerprint_hook.js` | 生成指纹终端 API 采样 Hook（仅取证，不进正式交付） | 采集 canvas/WebGL 等读数时 | `fingerprint.md`、`hook-templates.md` |
 
@@ -99,6 +100,16 @@
 | --- | --- | --- | --- |
 | `assets/examples/jsdom-composition.js` | jsEnv + jsdom 正式初始化的最小组合示例 | 有 DOM 需求时的组合方式 | `runtime-frameworks.md` |
 | `assets/examples/jsdom-trait-probe.js` | 初始化后只观察 jsdom 自身可检测特征，输出 JSON | 用了 jsdom 后做本地已知差异自检 | `runtime-frameworks.md`（分层原则 / jsdom 自身特征） |
+
+## 维护期评测（非用户任务前置）
+
+| 资产 | 用途 | 何时用 | 相关文档 |
+| --- | --- | --- | --- |
+| evals 目录 | 环境修复独立 Agent 场景包（题面／workspace／隐藏键／评分规则） | skill 维护对比新旧行为时 | 见该目录 README／BOUNDARY／isolation |
+| `scripts/run_eval_agent_isolated.mjs` | **唯一默认**隔离启动：Seatbelt 拒绝答案路径后执行被测命令 | 启动被测 Agent／探针 | `evals/isolation.md` |
+| `scripts/build_eval_skill_clean.mjs` | 生成无答案 SKILL_CLEAN 物理副本 | 隔离启动前准备 skill 视图 | 同上 |
+| `scripts/stage_eval_agent_workspace.mjs` | 仅暂存题面＋workspace（**非**隔离本身） | 启动器内部或手工准备 AGENT_WS | 同上 |
+| `evals/lib/isolation-probe.mjs` | 隔离内读写探针（须经 run_eval_agent_isolated） | 验收／CI | 同上 |
 
 ## 测试与依赖
 

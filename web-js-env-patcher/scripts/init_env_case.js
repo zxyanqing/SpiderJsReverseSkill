@@ -139,6 +139,24 @@ function initCase(args) {
 | --- | --- | --- | --- | --- | --- | --- |
 `;
   put(path.join(caseDir, 'notes', '代码变更记忆.md'), memory, args.force, actions);
+  // Y04: optional multi-identity resource manifest (fields may stay null; old cases omit entirely).
+  const resourceManifest = {
+    schemaVersion: 'resource-manifest/v1',
+    identity: {
+      runtime: null,
+      fixture: null,
+      patchRevision: null,
+      config: null,
+      notes: '多身份分开记录：脚本/WASM 内容哈希 ≠ runtime/fixture ≠ 环境补丁修订 ≠ 配置；见 references/records-and-delivery.md「复现身份关联」。',
+    },
+    resources: [],
+  };
+  put(
+    path.join(caseDir, 'notes', 'resource-manifest.json'),
+    JSON.stringify(resourceManifest, null, 2) + '\n',
+    args.force,
+    actions
+  );
   return { schemaVersion: 'env-case-init/v2', caseDir, actions };
 }
 
